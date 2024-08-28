@@ -54,3 +54,18 @@ void neuron::Neuron::destroy_conn(size_t i)
 {
     connections.erase(connections.begin() + i);
 }
+
+std::vector<double> *neuron::Neuron::get_inp_signals()
+{
+    return &_inp_signals;
+}
+
+void neuron::Neuron::result(double res)
+{
+    _res_signal = res;
+}
+
+double neuron::Neuron::get_res()
+{
+    return _res_signal;
+}

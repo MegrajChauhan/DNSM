@@ -51,6 +51,12 @@ namespace neuron
       void connect(Neuron *receiver, double _th);
 
       void destroy_conn(size_t i);
+
+      std::vector<double>* get_inp_signals();
+
+      void result(double res);
+
+      double get_res();
    };
 };
 
