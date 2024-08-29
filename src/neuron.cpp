@@ -1,6 +1,6 @@
 #include "neuron.hpp"
 
-void neuron::Neuron::init(size_t i, double cp, double ct, double dp, double dt, std::unordered_map<size_t, bool> *cl, activation_func_t f, bool is_io)
+void neuron::Neuron::init(size_t i, double cp, double ct, double dp, double dt, std::set<Neuron *> *cl, activation_func_t f, bool is_io)
 {
     _conn_threshold = ct;
     _conn_potential = cp;
@@ -26,7 +26,7 @@ void neuron::Neuron::broadcast()
         if (_p._send_threshold <= _res_signal)
         {
             _p.receiver->accept_val(_res_signal);
-            (*_call_list)[_p.receiver->get_ind()] = true;
+            _call_list->insert(_p.receiver);
         }
     }
 }

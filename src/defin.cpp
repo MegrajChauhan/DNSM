@@ -38,7 +38,7 @@ void defin::activation::_simple_max_min_diff(neuron::Neuron *n)
 
 void defin::activation::_simple_rand_times_max(neuron::Neuron *n)
 {
-    std::srand(std::clock()); // not the best of options
+    std::srand(std::time(NULL)); // not the best of options
     std::vector<double> *signals = n->get_inp_signals();
     double result = *std::max_element(signals->begin(), signals->end()) * (std::rand() / RAND_MAX);
     n->result(result);

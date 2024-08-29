@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <set>
 
 namespace neuron
 {
@@ -29,7 +30,7 @@ namespace neuron
       double _dest_potential;
       double _dest_threshold;
       activation_func_t _activation_func;
-      std::unordered_map<size_t, bool> *_call_list;
+      std::set<Neuron *> *_call_list;
       bool _io_neuron;
       std::vector<double> _inp_signals;
       double _res_signal; // the result of the activation function
@@ -38,7 +39,7 @@ namespace neuron
    public:
       Neuron() = default;
 
-      void init(size_t i, double cp, double ct, double dp, double dt, std::unordered_map<size_t, bool> *cl, activation_func_t f, bool is_io);
+      void init(size_t i, double cp, double ct, double dp, double dt, std::set<Neuron *> *cl, activation_func_t f, bool is_io);
 
       void activate();
 
@@ -52,7 +53,7 @@ namespace neuron
 
       void destroy_conn(size_t i);
 
-      std::vector<double>* get_inp_signals();
+      std::vector<double> *get_inp_signals();
 
       void result(double res);
 
