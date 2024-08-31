@@ -25,3 +25,11 @@ Though receiving all inputs might be ideal for a more accurate and intelligent n
 The main purpose of this model was to try and mimic a biological neuron as closely as my knowledge allows and if my knowledge is correct then a biological
 neuron never waits for input connections, it just passes the signals if the signal has a certain strength.
 Thus, we will do the same and gamble on it.
+
+# Loop out of thin air
+An interesting observation. The cause is most likely some kind of flaw in the design but the result is interesting. An infinite loops pops out of nowhere once
+every few attempts, in most cases, once every 5 to 7 runs. For some reason the call list is never fully emptied and everything goes in circles. Most likely the
+cause is the creation of looped connections.
+
+## Only Solution
+Create something that will visualize all the connections for us.

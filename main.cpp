@@ -2,6 +2,8 @@
 #include "defin.hpp"
 #include "neuron.hpp"
 #include "defines.hpp"
+#include <random>
+#include <array>
 
 struct DNSM
 {
@@ -10,6 +12,7 @@ struct DNSM
     std::vector<neuron::Neuron> neurons;
     std::vector<neuron::Neuron> input_neurons;
     std::vector<neuron::Neuron> output_neurons;
+    std::vector<std::array<uint8_t, IO_NEURON_COUNT>> input;
 };
 
 void populate_activate_functions(std::vector<neuron::activation_func_t> *);
@@ -17,6 +20,7 @@ void init_neuron(neuron::Neuron *, size_t, bool);
 void init_io_neurons();
 void init_hidden_neurons();
 void randomize_connections();
+void run_network();
 
 static DNSM dnsm;
 
@@ -26,6 +30,13 @@ int main()
     init_io_neurons();
     init_hidden_neurons();
     randomize_connections();
+    std::array<uint8_t, IO_NEURON_COUNT> i = {'1', '+', '2', '3'};
+    dnsm.input.push_back(i);
+    i = {'1', '+', '1', '2'};
+    dnsm.input.push_back(i);
+    run_network();
+    // we will define how we get our inputs later on
+    // for now we just have to setup something
 }
 
 void populate_activate_functions(std::vector<neuron::activation_func_t> *func_list)
@@ -42,12 +53,6 @@ void populate_activate_functions(std::vector<neuron::activation_func_t> *func_li
     func_list->push_back(&defin::activation::_simple_rand_times_max);
     func_list->push_back(&defin::activation::_simple_square_product);
     func_list->push_back(&defin::activation::_simple_square_sum);
-}
-
-void init_neuron(neuron::Neuron *n, size_t i, bool io)
-{
-    std::srand(time(NULL));
-    n->init(i, ((double)rand() / (double)RAND_MAX) * (double)_FIELD_VAL_MAX_VAL, ((double)rand() / (double)RAND_MAX) * (double)_FIELD_VAL_MAX_VAL, ((double)rand() / (double)RAND_MAX) * (double)_FIELD_VAL_MAX_VAL, ((double)rand() / (double)RAND_MAX) * (double)_FIELD_VAL_MAX_VAL, &dnsm.call_list, dnsm.func_list[(size_t)(((double)rand() / (double)RAND_MAX) * (double)dnsm.func_list.size())], io);
 }
 
 void init_io_neurons()
@@ -76,31 +81,76 @@ void init_hidden_neurons()
     }
 }
 
+void init_neuron(neuron::Neuron *n, size_t i, bool io)
+{
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<> dis(0.0, _FIELD_VAL_MAX_VAL);
+    std::uniform_int_distribution<> func_dis(0, dnsm.func_list.size() - 1);
+
+    n->init(i, dis(gen), dis(gen), dis(gen), dis(gen), &dnsm.call_list, dnsm.func_list[func_dis(gen)], io);
+}
+
 void randomize_connections()
 {
-    // This randomizes in three-steps
-    // First Input-Hidden
-    // Second Hidden-Hidden
-    // Third Hidden-Output
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_real_distribution<> threshold_dis(0.0, _PATH_THRESHOLD_MAX_);
+    std::uniform_int_distribution<> io_dis(0, IO_NEURON_COUNT - 1);
+    std::uniform_int_distribution<> hidden_dis(0, HIDDEN_NEURON_COUNT - 1);
+
+    // Randomize Input-Hidden connections
     for (size_t i = 0; i < INPUT_MAX_CONN; i++)
     {
-        srand(time(NULL));
-        int i1 = (rand() / RAND_MAX) * IO_NEURON_COUNT;
-        int i2 = (rand() / RAND_MAX) * HIDDEN_NEURON_COUNT;
-        dnsm.input_neurons[i1].connect(&dnsm.neurons[i2], ((double)rand() / (double)RAND_MAX) * (double)_PATH_THRESHOLD_MAX_);
+        int i1 = io_dis(gen);
+        int i2 = hidden_dis(gen);
+        dnsm.input_neurons[i1].connect(&dnsm.neurons[i2], threshold_dis(gen));
     }
+
+    // Randomize Hidden-Hidden connections
     for (size_t i = 0; i < HIDDEN_MAX_CONN; i++)
     {
-        srand(time(NULL));
-        int i1 = (rand() / RAND_MAX) * HIDDEN_NEURON_COUNT;
-        int i2 = (rand() / RAND_MAX) * HIDDEN_NEURON_COUNT;
-        dnsm.neurons[i1].connect(&dnsm.neurons[i2], ((double)rand() / (double)RAND_MAX) * (double)_PATH_THRESHOLD_MAX_);
+        int i1 = hidden_dis(gen);
+        int i2 = hidden_dis(gen);
+        dnsm.neurons[i1].connect(&dnsm.neurons[i2], threshold_dis(gen));
     }
+
+    // Randomize Hidden-Output connections
     for (size_t i = 0; i < OUTPUT_MAX_CONN; i++)
     {
-        srand(time(NULL));
-        int i1 = ((rand() / RAND_MAX) * IO_NEURON_COUNT);
-        int i2 = (rand() / RAND_MAX) * HIDDEN_NEURON_COUNT;
-        dnsm.output_neurons[i1].connect(&dnsm.neurons[i2], ((double)rand() / (double)RAND_MAX) * (double)_PATH_THRESHOLD_MAX_);
+        int i1 = io_dis(gen);
+        int i2 = hidden_dis(gen);
+        dnsm.output_neurons[i1].connect(&dnsm.neurons[i2], threshold_dis(gen));
+    }
+}
+
+void run_network()
+{
+    for (auto _in : dnsm.input)
+    {
+        size_t i = 0;
+        for (auto n : dnsm.input_neurons)
+        {
+            n.accept_val((double)_in[i]);
+            n.activate();
+            n.broadcast();
+            i++;
+        }
+        while (!dnsm.call_list.empty())
+        {
+            auto temp = dnsm.call_list;
+            dnsm.call_list.clear();
+            for (auto _neuron : temp)
+            {
+                _neuron->activate();
+                _neuron->broadcast();
+                // we aren't worried about creating new connections or destroying old connections yet
+            }
+        }
+        for (auto _on : dnsm.output_neurons)
+        {
+            // _on.activate();
+            std::cout << "OUTPUT: [" << _on.get_ind() << "]: " << _on.get_res()<< "\n";
+        }
     }
 }
