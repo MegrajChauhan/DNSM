@@ -15,12 +15,15 @@ void neuron::Neuron::init(size_t i, double cp, double ct, double dp, double dt, 
 void neuron::Neuron::activate()
 {
     _activation_func(this); // this should handle all of it
+    _inp_signals.clear();
 }
 
 void neuron::Neuron::broadcast()
 {
     // Go through each path and broadcast the resulting signal
     // But only to those neurons who cross the threshold signal
+    if (connections.empty())
+        return;
     for (auto _p : connections)
     {
         if (_p._send_threshold <= _res_signal)
@@ -68,4 +71,15 @@ void neuron::Neuron::result(double res)
 double neuron::Neuron::get_res()
 {
     return _res_signal;
+}
+
+void neuron::Neuron::provide_info(std::fstream *_stream)
+{
+    *_stream << "INDEX: " << ind << "\nCONN_POTEN: " << _conn_potential << "\nDEST_POTEN: " << _dest_potential << "\nCONN_THR: " << _conn_threshold << "\nDEST_THR: " << _dest_threshold;
+    *_stream << "\n";
+}
+
+std::vector<neuron::Path> neuron::Neuron::get_connections()
+{
+    return connections;
 }

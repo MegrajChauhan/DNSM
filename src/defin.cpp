@@ -7,7 +7,6 @@ void defin::activation::_simple_add(neuron::Neuron *n)
     for (const auto _s : *signals)
         result += _s;
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_product(neuron::Neuron *n)
@@ -17,7 +16,6 @@ void defin::activation::_simple_product(neuron::Neuron *n)
     for (const auto _s : *signals)
         result *= _s;
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_max(neuron::Neuron *n)
@@ -25,7 +23,6 @@ void defin::activation::_simple_max(neuron::Neuron *n)
     std::vector<double> *signals = n->get_inp_signals();
     double result = *std::max_element(signals->begin(), signals->end());
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_max_min_diff(neuron::Neuron *n)
@@ -33,7 +30,6 @@ void defin::activation::_simple_max_min_diff(neuron::Neuron *n)
     std::vector<double> *signals = n->get_inp_signals();
     double result = *std::max_element(signals->begin(), signals->end()) - *std::min_element(signals->begin(), signals->end());
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_rand_times_max(neuron::Neuron *n)
@@ -42,7 +38,6 @@ void defin::activation::_simple_rand_times_max(neuron::Neuron *n)
     std::vector<double> *signals = n->get_inp_signals();
     double result = *std::max_element(signals->begin(), signals->end()) * (std::rand() / RAND_MAX);
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_product_sum_diff(neuron::Neuron *n)
@@ -77,7 +72,6 @@ void defin::activation::_simple_half_product_half_sum_diff(neuron::Neuron *n)
 
     result = _mul_res - _sum_res;
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_average(neuron::Neuron *n)
@@ -108,7 +102,6 @@ void defin::activation::_simple_square_sum(neuron::Neuron *n)
     for (const auto _s : *signals)
         result += std::pow(_s, 2);
     n->result(result);
-    signals->erase(signals->begin(), signals->end());
 }
 
 void defin::activation::_simple_square_product(neuron::Neuron *n)
@@ -118,5 +111,4 @@ void defin::activation::_simple_square_product(neuron::Neuron *n)
     for (const auto _s : *signals)
         result *= std::pow(_s, 2);
     n->result(result - ((std::rand() / RAND_MAX) * result));
-    signals->erase(signals->begin(), signals->end());
 }

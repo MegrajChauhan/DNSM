@@ -4,6 +4,9 @@
 #include "defines.hpp"
 #include <random>
 #include <array>
+#include <fstream>
+
+#define _FNAME_ "text.txt"
 
 struct DNSM
 {
@@ -21,6 +24,7 @@ void init_io_neurons();
 void init_hidden_neurons();
 void randomize_connections();
 void run_network();
+void textualize_network();
 
 static DNSM dnsm;
 
@@ -30,6 +34,7 @@ int main()
     init_io_neurons();
     init_hidden_neurons();
     randomize_connections();
+    // textualize_network();
     std::array<uint8_t, IO_NEURON_COUNT> i = {'1', '+', '2', '3'};
     dnsm.input.push_back(i);
     i = {'1', '+', '1', '2'};
@@ -120,7 +125,7 @@ void randomize_connections()
     {
         int i1 = io_dis(gen);
         int i2 = hidden_dis(gen);
-        dnsm.output_neurons[i1].connect(&dnsm.neurons[i2], threshold_dis(gen));
+        dnsm.neurons[i1].connect(&dnsm.output_neurons[i2], threshold_dis(gen));
     }
 }
 
@@ -150,7 +155,58 @@ void run_network()
         for (auto _on : dnsm.output_neurons)
         {
             // _on.activate();
-            std::cout << "OUTPUT: [" << _on.get_ind() << "]: " << _on.get_res()<< "\n";
+            std::cout << "OUTPUT: [" << _on.get_ind() << "]: " << _on.get_res() << "\n";
         }
     }
+}
+
+void textualize_network()
+{
+    std::fstream f(_FNAME_, std::ios::out);
+    f << "NEURON INFO:\n";
+    // Input neurons
+    f << "\nINPUT NEURONS:\n";
+    for (auto n : dnsm.input_neurons)
+        n.provide_info(&f);
+    // output neurons
+    f << "\nOUTPUT NEURONS:\n";
+    for (auto n : dnsm.output_neurons)
+        n.provide_info(&f);
+    // hidden neurons
+    f << "\nHIDDEN NEURONS:\n";
+    for (auto n : dnsm.neurons)
+        n.provide_info(&f);
+    f << "\nALL CONNECTIONS:\n";
+    // trace connections
+    f << "\nINPUT NEURONS:\n";
+    for (auto n : dnsm.input_neurons)
+    {
+        auto conn = n.get_connections();
+        if (conn.empty())
+            continue;
+        f << "IND: " << n.get_ind() << "\n";
+        for (auto p : conn)
+            f << "\t<" << p._send_threshold << ">: " << "IND: " << p.receiver->get_ind() << "\n";
+    }
+    f << "\nHIDDEN NEURONS:\n";
+    for (auto n : dnsm.neurons)
+    {
+        auto conn = n.get_connections();
+        if (conn.empty())
+            continue;
+        f << "IND: " << n.get_ind() << "\n";
+        for (auto p : conn)
+            f << "\t<" << p._send_threshold << ">: " << "IND: " << p.receiver->get_ind() << "\n";
+    }
+    f << "\nOUTPUT NEURONS:\n";
+    for (auto n : dnsm.output_neurons)
+    {
+        auto conn = n.get_connections();
+        if (conn.empty())
+            continue;
+        f << "IND: " << n.get_ind() << "\n";
+        for (auto p : conn)
+            f << "\t<" << p._send_threshold << ">: " << "IND: " << p.receiver->get_ind() << "\n";
+    }
+    f.close();
 }

@@ -6,6 +6,7 @@
 #include <string>
 #include <thread>
 #include <set>
+#include <fstream>
 
 namespace neuron
 {
@@ -58,6 +59,10 @@ namespace neuron
       void result(double res);
 
       double get_res();
+
+      void provide_info(std::fstream *_stream);
+
+      std::vector<Path> get_connections();
    };
 };
 
