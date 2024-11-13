@@ -14,6 +14,7 @@ void DNSM::ThreadPool::thread_pool_init()
                     if (fetch_task(&node))
                     {
                         // we have a task to do
+                        Neuron *n = get_from_pool(node.task);
                     }
                 }
             });

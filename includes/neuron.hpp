@@ -2,12 +2,31 @@
 #define _NEURON_
 
 #include "conf.hpp"
+#include "utils.hpp"
 #include <string>
 #include <vector>
 
 namespace DNSM
 {
     typedef double __neuron_field_t;
+    typedef double __path_field_t;
+
+    class Neuron;
+
+    /**
+     * @path_activation_value: Similar to the Neuron's @stimulation_threshold but for a path
+     * 
+     */
+    struct Path
+    {
+        Neuron *receiver;
+        Neuron *sender;
+
+        __path_field_t path_activation_value;
+
+        // The path is what will hold the signal that is passed to the receiver
+        __path_field_t sent_signal;
+    };
 
     /**
      * Neuron needs to be a heavy class
@@ -34,8 +53,16 @@ namespace DNSM
         size_t times_input_received; // how many times was the neuron activated?
         size_t identifying_mark;     // The "name" of the neuron
 
+        std::vector<Path> connections;
+
+        // We don't store the incoming calls because we don't have to
+
     public:
-        Neuron();
+        Neuron() = default;
+
+        void init_neuron();
+
+        void mark_neuron(size_t mark);
     };
 };
 
