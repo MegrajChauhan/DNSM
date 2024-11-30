@@ -21,6 +21,7 @@ namespace DNSM
     struct ThreadPoolTask
     {
         size_t _this;
+        Path *incoming;
     };
 
     class ThreadPool
@@ -37,7 +38,7 @@ namespace DNSM
 
         void thread_pool_init();
 
-        void add_tasks(ThreadPoolTask *task);
+        void add_tasks(ThreadPoolTask task);
 
         void thread_pool_terminate();
     };

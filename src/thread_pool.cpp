@@ -46,9 +46,9 @@ bool DNSM::ThreadPool::fetch_task(ThreadPoolNode *node)
     return res;
 }
 
-void DNSM::ThreadPool::add_tasks(ThreadPoolTask *task)
+void DNSM::ThreadPool::add_tasks(ThreadPoolTask task)
 {
     _fetch_lock.lock(); // The same lock
-    _tasks.push(std::move(*task));
+    _tasks.push(task);
     _fetch_lock.unlock();
 }
