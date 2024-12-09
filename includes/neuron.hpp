@@ -3,6 +3,7 @@
 
 #include "conf.hpp"
 #include "utils.hpp"
+#include "funcs.hpp"
 #include <string>
 #include <vector>
 #include <thread>
@@ -62,6 +63,9 @@ namespace DNSM
         size_t times_input_received; // how many times was the neuron activated?
         size_t identifying_mark;     // The "name" of the neuron
 
+        size_t maximum_connections; // The maximum connections that will be possible
+        
+
         std::vector<Path> connections; // These connections are the outgoing connections only
 
         // We don't store the incoming calls because we don't have to
@@ -73,14 +77,24 @@ namespace DNSM
 
         __neuronstate_t state;
 
+        __activationfn_t activation_function;
+
+        double current_output;
+
     public:
         Neuron() = default;
 
         void init_neuron();
 
+        void set_activation_func(__activationfn_t fn);
+
         void mark_neuron(size_t mark);
 
         void activate(Path *incoming);
+
+        void obtain_neuron_lock();
+
+        void release_neuron_lock();
     };
 };
 
